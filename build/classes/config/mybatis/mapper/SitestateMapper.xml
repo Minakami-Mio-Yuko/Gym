@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+    <mapper namespace="com.ugm.site.mapper.SitestateMapper">
+    
+    <resultMap type="sitestate" id="stateMap">
+   <result column="site_id" property="siteId"/>
+   <result column="site_condition" property="siteCondition"/>
+   <result column="site_book" property="siteBook"/>
+   </resultMap>
+   
+   
+   	<!-- 插入 -->
+	<insert id="insertstate"  parameterType="sitestate">
+		insert into site_state(site_id,site_condition,site_book) values(#{siteId},#{siteCondition},#{siteBook})
+	</insert>
+   
+   <!-- 关联查询 -->
+   	<select id="selectstate" resultMap="stateMap" parameterType="int">
+		select * from site_state where site_id = #{_parameter}
+	</select>
+	
+	<!-- 更新state -->
+	<update id="updatestate" parameterType="sitestate">
+		update site_state set site_condition=#{siteCondition},site_Book=#{siteBook} where site_id=#{siteId}
+	</update>  
+    </mapper>

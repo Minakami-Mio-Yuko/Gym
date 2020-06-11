@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+   <mapper namespace="com.ugm.site.mapper.SiteDetailMapper">
+   <resultMap type="siteDetail" id="detailMap">
+   <result column="site_id" property="siteId"/>
+   <result column="site_name" property="siteName"/>
+   <result column="site_location" property="siteLocation"/>
+   <result column="site_configuration" property="siteConfiguration"/>
+   <result column="site_rentprice" property="siteRentprice"/>
+   <result column="site_depositprice" property="siteDepositprice"/>
+   <association property="sitestate" column="site_id" select="com.ugm.site.mapper.SitestateMapper.selectstate" javaType="com.ugm.site.po.Sitestate">
+   </association>
+   </resultMap>
+   
+   
+   <!-- 插入 -->
+   	<insert id="insertdetail" useGeneratedKeys="true" keyProperty="siteId" parameterType="siteDetail">
+		insert into site_detail (site_name,site_location,site_configuration,site_rentprice,site_depositprice) values(#{siteName},#{siteLocation},#{siteConfiguration},#{siteRentprice},#{siteDepositprice})
+	</insert>
+
+   
+   
+   <!-- 查询全部，用于主页面 -->
+   <select id="selectall" resultMap="detailMap">
+   select a.*,b.site_condition,b.site_book from site_detail a,site_state b where a.site_id=b.site_id
+   </select>
+   
+   
+   
+   <!-- 单条查询，用于主页面模糊查询 -->
+      <select id="selectbyindex" resultMap="detailMap" parameterType="siteDetail">
+   select a.*,b.site_condition,b.site_book from site_detail a,site_state b 
+   <where>
+    <if test="1==1">
+   and a.site_id=b.site_id 
+    </if>
+   <if test="siteLocation !=''"> and a.site_location like #{siteLocation}
+   </if>
+      <if test="siteName !=''"> and a.site_name like #{siteName}
+   </if>
+   </where>
+   </select>
+   
+   
+   <!-- 用户页面模糊查询 -->
+    <select id="selectbyuser" resultMap="detailMap" parameterType="siteDetail">
+   select a.*,b.site_condition,b.site_book from site_detail a,site_state b 
+   <where>
+    <if test="1==1">
+   and a.site_id=b.site_id 
+    </if>
+   <if test="sitestate.siteBook==1 || sitestate.siteBook==0 "> and b.site_book = #{sitestate.siteBook}
+   </if>
+      <if test="siteName !=''"> and a.site_name like #{siteName}
+   </if>
+   </where>
+   </select>
+   
+   
+   <!-- 更新 -->
+   <update id="editone" parameterType="siteDetail">
+   update site_detail set site_name=#{siteName},site_location=#{siteLocation},site_configuration=#{siteConfiguration},site_rentprice=#{siteRentprice},site_depositprice=#{siteDepositprice} where site_id=#{siteId}
+   </update>
+   
+   
+   
+   <!-- 通过id查询 -->
+    <select id="selectbyid" resultMap="detailMap" parameterType="int">
+   select a.*,b.site_condition,b.site_book from site_detail a,site_state b 
+   <where>
+    <if test="1==1">
+   and  a.site_id=#{_parameter}
+    </if>
+   <if test="1==1"> and a.site_id=b.site_id
+   </if>
+   </where>
+   </select>
+   
+   
+   <delete id="deleteone" parameterType="int">
+   delete from site_detail where site_id=#{parameter}
+   </delete>
+   
+
+   
+   
+   
+   </mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+    <mapper namespace="com.ugm.site.mapper.SiteOrderMapper">
+          
+   <resultMap type="siteOrder" id="orderMap">
+   <result column="order_id" property="orderId"/>
+   <result column="order_siteid" property="ordersiteId"/>
+   <result column="order_starttime" property="orderStarttime"/>
+   <result column="order_endtime" property="orderEndtime"/>
+   <result column="order_booktime" property="orderBooktime"/>
+   <result column="order_rentprice" property="orderRentprice"/>
+   <result column="order_depositprice" property="orderDepositprice"/>
+   <result column="order_ifpay" property="orderIfpay"/>
+   <association property="siteDetail" column="order_siteid" select="com.ugm.site.mapper.SiteDetailMapper.selectbyid" javaType="com.ugm.site.po.SiteDetail">
+   </association>
+   </resultMap>
+    
+    <select id="userquery" parameterType="int" resultMap="orderMap">
+    select a.order_starttime,a.order_endtime,a.order_siteid from site_order a,site_detail b where order_siteid=#{_parameter} and b.site_id=a.order_siteid
+    </select>
+    
+       <!-- 插入 -->
+   	<insert id="insertorder" useGeneratedKeys="true" keyProperty="orderId" parameterType="siteOrder">
+		insert into site_order (order_siteid,order_starttime,order_endtime,order_booktime,order_rentprice,order_depositprice,order_ifpay) values(#{ordersiteId},#{orderStarttime},#{orderEndtime},#{orderBooktime},#{orderRentprice},#{orderDepositprice},1)
+	</insert>
+    
+    <select id="allorder" resultMap="orderMap">
+    select a.*,b.site_name from site_order a,site_detail b where a.order_siteid=b.site_id
+    </select>
+    
+    
+    </mapper>

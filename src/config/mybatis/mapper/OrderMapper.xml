@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ugm.equipmentmanager.dao.OrderDao">
+<!--根据订单查找器材订单关系表里的器材id-->
+    <select id="resQueryEqu" parameterType="List" resultType="Integer">
+        SELECT equ_id FROM equ_order_relation 
+      <if test="orderListId!=null">
+          WHERE 
+  	    <foreach collection="orderListId" item="item" index="index" separator="or">
+              order_id = #{item}
+  	    </foreach>
+      </if>
+    </select>
+<!--根据器材订单关系表里的器材id查找未被预约的器材-->
+    <select id="resQueryEquId" parameterType="List" resultType="Equipment">
+        SELECT * FROM equipment where broken_condition =0 
+      <if test="equId!=null">
+        and
+    	<foreach collection="equId" item="item" index="index" separator="and">
+              equ_id != #{item}
+    	</foreach>
+      </if>
+    </select>
+<!--根据器材订单关系表里的器材id查找未被预约的器材,并分组统计数量-->
+    <select id="resQuery" parameterType="List" resultType="Equipment">
+        select * , Count(*) quantity from equipment where broken_condition =0 
+      <if test="equId!=null">
+        and
+    	<foreach collection="equId" item="item" index="index" open="(" separator="and" close=")">
+              equ_id != #{item}
+    	</foreach>
+      </if>
+      	GROUP BY equ_name	
+    </select>
+	
+<!--生成订单,返回订单id-->
+  	<insert id="orderResList" parameterType="List">
+  	<selectKey keyProperty="orderListId" order="AFTER" resultType="java.lang.Integer">
+			SELECT LAST_INSERT_ID()
+	</selectKey>  
+  	insert into equ_order_list(order_list_id,res_time,res_deposit,user_id,rent_time,return_date,order_condition,rent_total_price)values
+   	(null,now(),#{resDeposit},null,#{rentTime},#{returnDate},'0',#{rentTotalPrice})
+  	</insert>  	
+  	
+<!--生成关系表-->
+  	<insert id="orderResRelation" parameterType="List">
+  	insert into equ_order_relation(equ_order_id,equ_id,order_id,return_condition)values
+  	      	<foreach collection="equId" item="item" index="index" separator=",">
+  	      	   <if test="item!=null">
+   	             (null,#{item},#{orderListId},null) 
+  	      	   </if>	
+  	        </foreach>
+  	</insert> 
+  	
+  	
+<!--退订-->
+<update id="orderUnsubscribeList" parameterType="List">
+    update equ_order_list set order_condition='6',remark=#{remark} where order_list_id in
+    <foreach collection="orderListId" item="item" index="index" open="(" separator="," close=")">
+              #{item}
+  	</foreach>
+</update> 
+
+
+<!--批量通过预约审批-->
+  	<update id="reservationApproval" parameterType="List">
+    update equ_order_list set order_condition='1',res_approver_id=null where order_list_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+<!--批量通过租用审批-->
+  	<update id="rentApproval" parameterType="List">
+    update equ_order_list set order_condition='3',rent_approver_id=null where order_list_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+<!--批量通过归还审批-->
+  	<update id="returnApproval" parameterType="List">
+    update equ_order_list set order_condition='5',return_approver_id=null where order_list_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+<!--批量通过退订审批-->
+  	<update id="unsubscribeApproval" parameterType="List">
+    update equ_order_list set order_condition='7',unsubscribe_approver_id=null where order_list_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+<!--租用-->
+  	<update id="rent" parameterType="List">
+    update equ_order_list set order_condition='2' where order_list_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+  	
+<!--归还情况设置-->
+    <update id="equReturnSituation" parameterType="List" >
+         update equ_order_relation set return_condition=case equ_id and order_id
+  	<foreach collection="list" item="item" index="index" >
+   	    when #{item.equId} and #{orderListId} then #{item.returnCondition}	
+  	</foreach>
+  	end
+  	WHERE equ_id in
+  	<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+   	    #{item.equId}
+  	</foreach>
+  	and order_id in (#{orderListId})
+    </update>
+  	
+</mapper>

@@ -1,0 +1,14 @@
+.container {
+	background-color: #eee;
+	margin-bottom: 25px;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	min-width: 336px;
+}
+
+h1 {
+	text-align: center
+}

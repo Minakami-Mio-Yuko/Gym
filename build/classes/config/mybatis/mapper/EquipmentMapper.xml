@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ugm.equipmentmanager.dao.EquipmentDao">
+  	<!--批量添加器材-->
+  	<insert id="newEqu" parameterType="List">
+  	insert into equipment(equ_name,rent_price,maintenance_price,reservation_price,buy_price) values
+  	
+  	<foreach collection="list" item="item" index="index" separator=",">
+   	(#{item.equName},#{item.rentPrice},#{item.maintenancePrice},#{item.reservationPrice},#{item.buyPrice}) 	
+  	</foreach>
+  	</insert>
+  	
+  	 <!--批量删除器材-->
+  	<update id="deleteEqu" parameterType="List">
+    update equipment set broken_condition='2' where equ_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+   <!--批量撤消删除器材-->
+  	<update id="cancelDeleteEqu" parameterType="List">
+    update equipment set broken_condition='0' where equ_id in
+  	<foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+   	    #{item} 	
+  	</foreach>
+  	</update>
+  	
+	<!--批量更新器材-->
+    <update id="updateEquGroup" parameterType="List" >
+         update equipment set rent_price=case equ_name
+  	<foreach collection="list" item="item" index="index" >
+   	    when #{item.equName} then #{item.rentPrice}	
+  	</foreach>
+  	end,
+  	reservation_price=case equ_name
+  	<foreach collection="list" item="item" index="index" >
+   	    when #{item.equName} then #{item.reservationPrice}	
+  	</foreach>
+  	end
+  	WHERE equ_name in
+  	<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+   	    #{item.equName}
+  	</foreach>
+    </update>
+  	
+  	<!--批量更新单个器材-->
+  	<update id="updateEqu" parameterType="List">
+    update equipment set maintenance_price=case equ_id
+  	<foreach collection="list" item="item" index="index" >
+   	    when #{item.equId} then #{item.maintenancePrice}	
+  	</foreach>
+  	end,
+  	buy_price=case equ_id
+  	<foreach collection="list" item="item" index="index">
+   	    when #{item.equId} then #{item.buyPrice}	
+  	</foreach>
+  	end,
+  	broken_condition=case equ_id
+  	<foreach collection="list" item="item" index="index">
+   	    when #{item.equId} then #{item.brokenCondition}	
+  	</foreach>
+  	end
+  	  	WHERE equ_id in
+  	<foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+   	    #{item.equId}
+  	</foreach>
+  	</update>
+  	
+  	<!--根据输入信息查询/模糊查询-->
+<!--   	<select id="findList" parameterType="Map" resultType="Equipment">
+  		select * from Equipment where use_condition != #{useCondition} 
+    </select> -->
+  	<!--根据输入信息查询/模糊查询-->
+  	<select id="findList" parameterType="Map" resultType="Equipment">
+  		select * from Equipment where 1=1 
+   		<if test="equId !=null">
+  			and equ_id = #{equId} 
+  		</if>
+  		<if test="equName !=null">
+  			and equ_name like #{equName} 
+  		</if>
+  		<if test="useCondition !=null"> 
+  			and use_condition = #{useCondition} 
+  		</if>
+  		<if test="brokenCondition !=null"> 
+  			and broken_condition = #{brokenCondition} 
+  		</if>
+  		<if test="rentPrice !=null">
+  			and rent_price = #{rentPrice} 
+  		</if>
+  		<if test="maintenancePrice !=null"> 
+  			and maintenance_price = #{maintenancePrice} 
+  		</if>
+  		<if test="reservationPrice !=null"> 
+  			and reservation_price = #{reservationPrice} 
+  		</if>
+<!--   		<if test="license_application_date !=null"> 
+  		"&lt;"为"<"号，"&gt;"为">"号 
+  			and license_application_date &lt;= #{license_application_date}  	
+  		</if> -->
+  		<if test="buyPrice !=null"> 
+  			and buy_price like #{buyPrice} 
+  		</if>
+  	</select>
+  	
+  	<!--查找符合查找要求的司机总数量-->
+  	<select id="getTotal" parameterType="Map" resultType="Equipment">
+  		select count(equ_id) from Driver where 1=1 
+   		<if test="equId !=null">
+  			and equ_id = #{equId} 
+  		</if>
+  		<if test="equName !=null">
+  			and equ_name like #{equName} 
+  		</if>
+  		<if test="useCondition !=null"> 
+  			and use_condition = #{useCondition} 
+  		</if>
+  		<if test="brokenCondition !=null"> 
+  			and broken_condition = #{brokenCondition} 
+  		</if>
+  		<if test="rentPrice !=null">
+  			and rent_price = #{rentPrice} 
+  		</if>
+  		<if test="maintenancePrice !=null"> 
+  			and maintenance_price = #{maintenancePrice} 
+  		</if>
+  		<if test="reservationPrice !=null"> 
+  			and reservation_price = #{reservationPrice} 
+  		</if>
+<!--   		<if test="license_application_date !=null"> 
+  		"&lt;"为"<"号，"&gt;"为">"号 
+  			and license_application_date &lt;= #{license_application_date}  	
+  		</if> -->
+  		<if test="buyPrice !=null"> 
+  			and buy_price like #{buyPrice} 
+  		</if>
+  	</select>
+  	
+</mapper>
